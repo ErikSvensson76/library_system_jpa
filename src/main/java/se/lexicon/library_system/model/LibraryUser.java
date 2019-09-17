@@ -32,7 +32,12 @@ public class LibraryUser {
 		setBirthDate(birthDate);
 		setEmail(email);
 	}
-
+	
+	protected LibraryUser(){
+		//Needed by JPA
+	}
+	
+	
 	public String getFirstName() {
 		return firstName;
 	}
