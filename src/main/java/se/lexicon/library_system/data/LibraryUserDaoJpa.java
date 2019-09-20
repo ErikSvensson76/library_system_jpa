@@ -1,11 +1,14 @@
 package se.lexicon.library_system.data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +34,10 @@ public class LibraryUserDaoJpa implements LibraryUserDao{
 
 	@Override
 	public List<LibraryUser> findAll() {
-		Query query = em.createQuery("SELECT u FROM LibraryUser u");
-		return query.getResultList();		
+		List<LibraryUser> result = new ArrayList<>();
+		TypedQuery<LibraryUser> query = em.createQuery("SELECT u FROM LibraryUser u", LibraryUser.class);
+		result = query.getResultList();
+		return result;	
 	}
 
 	@Override
