@@ -1,11 +1,17 @@
 package se.lexicon.library_system.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class LibraryUser {
@@ -18,24 +24,69 @@ public class LibraryUser {
 	private LocalDate birthDate;
 	private String email;
 	
-	public LibraryUser(int id, String firstName, String lastName, LocalDate birthDate, String email) {
-		this(firstName, lastName, birthDate, email);
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private UserDetail detail;
+	
+	@OneToMany(
+			mappedBy = "user", 
+			cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+			fetch = FetchType.LAZY
+			)
+	private List<Book> lendedBooks = new ArrayList<>();
+	
+	public LibraryUser(int id, String firstName, String lastName, LocalDate birthDate, String email, UserDetail detail) {
+		this(firstName, lastName, birthDate, email, detail);
 		this.id = id;		
 	}
 
-	public LibraryUser(String firstName, String lastName, LocalDate birthDate, String email) {
-
+	public LibraryUser(String firstName, String lastName, LocalDate birthDate, String email, UserDetail detail) {
 		setFirstName(firstName);
 		setLastName(lastName);
 		setBirthDate(birthDate);
 		setEmail(email);
+		setDetail(detail);		
 	}
 	
 	protected LibraryUser(){
 		//Needed by JPA
 	}
 	
+	public boolean addBook(Book book) {
+		if(lendedBooks.contains(book)) {
+			return false;
+		}
+		
+		lendedBooks.add(book);
+		book.setUser(this);
+		return true;
+	}
 	
+	public boolean returnBook(Book book) {
+		if(!lendedBooks.contains(book)) {
+			return false;
+		}
+		
+		lendedBooks.remove(book);
+		book.setUser(null);
+		return true;		
+	}
+	
+	public List<Book> getLendedBooks() {
+		return lendedBooks;
+	}
+
+	public void setLendedBooks(List<Book> lendedBooks) {
+		this.lendedBooks = lendedBooks;
+	}
+
+	public UserDetail getDetail() {
+		return detail;
+	}
+
+	public void setDetail(UserDetail detail) {
+		this.detail = detail;
+	}
+
 	public String getFirstName() {
 		return firstName;
 	}
